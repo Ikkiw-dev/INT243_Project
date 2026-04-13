@@ -1,0 +1,48 @@
+Patient ID
+PatientID: A unique identifier assigned to each patient (5034 to 7425).
+Demographic Details
+Age: The age of the patients ranges from 5 to 80 years.
+Gender: Gender of the patients, where 0 represents Male and 1 represents Female.
+Ethnicity: The ethnicity of the patients, coded as follows:
+0: Caucasian
+1: African American
+2: Asian
+3: Other
+EducationLevel: The education level of the patients, coded as follows:
+0: None
+1: High School
+2: Bachelor's
+3: Higher
+
+Lifestyle Factors
+BMI: Body Mass Index of the patients, ranging from 15 to 40.
+Smoking: Smoking status, where 0 indicates No and 1 indicates Yes.
+PhysicalActivity: Weekly physical activity in hours, ranging from 0 to 10.
+DietQuality: Diet quality score, ranging from 0 to 10.
+SleepQuality: Sleep quality score, ranging from 4 to 10.
+Environmental and Allergy Factors
+PollutionExposure: Exposure to pollution, score from 0 to 10.
+PollenExposure: Exposure to pollen, score from 0 to 10.
+DustExposure: Exposure to dust, score from 0 to 10.
+PetAllergy: Pet allergy status, where 0 indicates No and 1 indicates Yes.
+
+Medical History
+FamilyHistoryAsthma: Family history of asthma, where 0 indicates No and 1 indicates Yes.
+HistoryOfAllergies: History of allergies, where 0 indicates No and 1 indicates Yes.
+Eczema: Presence of eczema, where 0 indicates No and 1 indicates Yes.
+HayFever: Presence of hay fever, where 0 indicates No and 1 indicates Yes.
+GastroesophagealReflux: Presence of gastroesophageal reflux, where 0 indicates No and 1 indicates Yes.
+Clinical Measurements
+LungFunctionFEV1: Forced Expiratory Volume in 1 second (FEV1), ranging from 1.0 to 4.0 liters.
+LungFunctionFVC: Forced Vital Capacity (FVC), ranging from 1.5 to 6.0 liters.
+
+Symptoms
+Wheezing: Presence of wheezing, where 0 indicates No and 1 indicates Yes.
+ShortnessOfBreath: Presence of shortness of breath, where 0 indicates No and 1 indicates Yes.
+ChestTightness: Presence of chest tightness, where 0 indicates No and 1 indicates Yes.
+Coughing: Presence of coughing, where 0 indicates No and 1 indicates Yes.
+NighttimeSymptoms: Presence of nighttime symptoms, where 0 indicates No and 1 indicates Yes.
+ExerciseInduced: Presence of symptoms induced by exercise, where 0 indicates No and 1 indicates Yes.
+
+Diagnosis Information
+Diagnosis (Outcome): Diagnosis status for Asthma, where 0 indicates No and 1 indicates Yes.
