@@ -45,4 +45,4 @@ NighttimeSymptoms: Presence of nighttime symptoms, where 0 indicates No and 1 in
 ExerciseInduced: Presence of symptoms induced by exercise, where 0 indicates No and 1 indicates Yes.
 
 Diagnosis Information
-Diagnosis (Outcome): Diagnosis status for Asthma, where 0 indicates No and 1 indicates Yes.
+     (Outcome): Diagnosis status for Asthma, where 0 indicates No and 1 indicates Yes.

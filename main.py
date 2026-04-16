@@ -1,67 +1,82 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns #pip install seaborn <use for data visualization>
+import matplotlib.pyplot as plt
 
+df_raw = pd.read_csv('asthma_disease_data_new.csv')    
 
-df = pd.read_csv('asthma_disease_data_new.csv')    
-pd.set_option('display.max_rows',None)
+def clean_data(data):
 
-def cleaning():
-    
-    PID = df["PatientID"]
-    age = df["Age"]
-    sex = df["Gender"]
-    eth = df["Ethnicity"] 
-    edu = df["EducationLevel"]
-    phy = df["Physicalactivity"]
-    diet = df["DietQuality"]
-    sleep = df["SleepQuality"]
-    pollution = df["PollutionExposure"]
-    pollen = df["PollenExposure"]
-    dust = df["DustExposure"]
-    pet = df["PetAllergy"]
-    family = df["FamilyHistoryAsthma"]
-    history = df["HistoryOfAllergies"]
-    eczema = df["Eczema"]
-    hayfever = df["HayFever"]
-    gastro = df["GastroesophagealReflux"]
-    fev1 = df["LungFunctionFEV1"]
-    fvc = df["LungFunctionFVC"]
-    
-    other_ethnicity = 3
+    df = data.copy()
+
+    numerical_columns = [
+        "Age",
+        "BMI",
+        "PhysicalActivity",
+        "DietQuality",
+        "SleepQuality",
+        "PollutionExposure",
+        "PollenExposure",
+        "DustExposure",
+        "LungFunctionFEV1",
+        "LungFunctionFVC"
+    ]    
+
+    categorical_columns = [
+        "Gender",
+        "Ethnicity"
+    ]
+
+    ordinal_columns = [
+        "EducationLevel"
+    ]
+
+    binary_columns = [
+        "Smoking",
+        "PetAllergy",
+        "FamilyHistoryAsthma",
+        "HistoryOfAllergies",
+        "Eczema",
+        "HayFever",
+        "GastroesophagealReflux",
+        "Wheezing",
+        "ShortnessOfBreath",
+        "ChestTightness",
+        "Coughing",
+        "NighttimeSymptoms",
+        "ExerciseInduced",
+    ]
 
     df["PatientID"] = df["PatientID"].interpolate(method= "linear").astype(int) #clean PID (fill up the missing value)
-    df["Age"] = df["Age"].fillna(df["Age"].mean().round()) # fill NaN val with mean of age
-    df["Ethnicity"] = df["Ethnicity"].fillna(other_ethnicity) # fill NaN val with 3(other ethnicity)
+       
+    for col in numerical_columns:
+        df[f"{col}_missing"] = df[col].isnull().astype(int)
+        df[col] = df[col].fillna(np.nanmedian(df[col].values))
 
+    for col in categorical_columns:
+        df[col] = df[col].fillna(-1)
 
-    # print(edu.value_counts(normalize=True)*100)
-    # print(cleaned_eth)
-    # print(cleaned_eth.value_counts(normalize=True)*100)
-    # print(sex)
+    for col in ordinal_columns:
+        df[f"{col}_missing"] = df[col].isnull().astype(int)
+        df[col] = df[col].fillna(-1)
+
+    for col in binary_columns:
+        df[col] = df[col].fillna(df[col].mode()[0])
 
     return df
 
-def clean_data(df):
-    
-    other_ethnicity = 3
+df_clean = clean_data(df_raw.copy())
 
-    df["PatientID"] = df["PatientID"].interpolate(method= "linear").astype(int) #clean PID (fill up the missing value)
-    
-    df["Age_missing"] = df["Age"].isnull().astype(int) # if Age was missing Age_missing value => 1 if not => 0
-    df["Age"] = df["Age"].fillna(df["Age"].median()) # fill NaN val with median of age
-    
-    df["Ethnicity"] = df["Ethnicity"].fillna(other_ethnicity) # fill NaN val with 3(other ethnicity)
-    
-    df["EducationLevel_missing"] = df["EducationLevel"].isnull().astype(int)
-    df["EducationLevel"] = df["EducationLevel"].fillna("unknown") # nominal
+def compare_before_after(raw, cleaned, column):
+    fig, axes = plt.subplots(1, 2, figsize=(12,5))
 
-    df["BMI_missing"] = df["BMI"].isnull().astype(int)
-    df["BMI"] = df["BMI"].fillna(df["BMI"].median) # continuous
+    sns.histplot(raw[column], kde=True, ax=axes[0])
+    axes[0].set_title(f"{column} Before Cleaning")
 
-    df["Smoking_missing"] = df["Smoking"].isnull().astype(int)
-    df["Smoking"] = df["Smoking"].fillna("unknown") # nominal
+    sns.histplot(cleaned[column], kde=True, ax=axes[1])
+    axes[1].set_title(f"{column} After Cleaning")
 
+    plt.tight_layout()
+    plt.show()
     
-    return df
-
-clean_data(df)
+compare_before_after(df_raw, df_clean, "Age")
