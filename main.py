@@ -65,9 +65,9 @@ def clean_data(data):
 
     return df
 
-df_clean = clean_data(df_raw.copy())
 
-def compare_before_after(raw, cleaned, column):
+
+def compare_before_after(raw, cleaned, column): # for numerical data
     fig, axes = plt.subplots(1, 2, figsize=(12,5))
 
     sns.histplot(raw[column], kde=True, ax=axes[0])
@@ -76,7 +76,18 @@ def compare_before_after(raw, cleaned, column):
     sns.histplot(cleaned[column], kde=True, ax=axes[1])
     axes[1].set_title(f"{column} After Cleaning")
 
+    changed = df_raw[column] != cleaned[column]
+
     plt.tight_layout()
     plt.show()
-    
-compare_before_after(df_raw, df_clean, "Age")
+    print(f"{column} Column total changed rows:", changed.sum())
+
+    return changed
+
+def main():
+    df_clean = clean_data(df_raw.copy())
+    compare_before_after(df_raw, df_clean, "SleepQuality")
+
+
+if __name__ == "__main__":
+    main()
