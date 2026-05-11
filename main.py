@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 df = pd.read_csv("asthma_disease_data_new.csv")
 
@@ -35,13 +36,12 @@ def fillMode():
 
 def FillDoctorInCharge():
     df["DoctorInCharge"] = df["DoctorInCharge"].fillna("Dr_Confid")
-    print("Process 4 : Manage DoctorInCharge columns completed")
+    print("Process 4 : Manage DoctorInCharge columns completed\n")
     
-
-def Main():
+def Preprocessing():
     Overview()
     
-    print("Data Cleansing Process started :)")
+    print("\nData Cleansing Process started :)\n")
     fillID()
     fillMed()
     fillMode()
@@ -50,4 +50,64 @@ def Main():
     print(df.head(10))
     df.to_csv("INT243_cleaned.csv", index=False)
 
-Main()
+Preprocessing()
+
+def validate():
+    print("Data Validation Process")
+    
+    invalid_age = df[(df["Age"] < 5) | (df["Age"] > 80)]
+    print(f"Invalid Age rows : {len(invalid_age)}")
+    invalid_bmi = df[(df["BMI"] < 15) | (df["BMI"] > 40)]
+    print(f"Invalide BMI rows : {len(invalid_bmi)}")
+    duplicates = df.duplicated().sum()
+    print(f"duplicates rows detected : {duplicates}")
+    
+    print("\nFinal Missing checker")
+    print(df.isna().sum())
+
+#demographic analysis to see that age - gender affected to asthma or not
+
+def demoanalyze():
+    print("\nDemoGraphic Analysis")
+    print(df["Age"].describe())
+    
+    print("\nGender Distribution :")
+    print(df["Gender"].value_counts())
+    
+    plt.figure(figsize=(8,5))
+    plt.hist(df["Age"], bins=10)
+    plt.xlabel("Age")
+    plt.ylabel("Frequency")
+    plt.title("Age Distribution")
+    plt.show()
+
+def LifestyleAnalysis():
+    print("\nLifestyle Analysis")
+    print(df[["BMI", "PhysicalActivity", "Smoking"]].describe())
+    plt.figure(figsize=(6,4))
+    df.boxplot(column="BMI", by="Diagnosis")
+    plt.title("BMI vs Asthma Diagnosis")
+    plt.suptitle("")
+    plt.show()
+
+def EnvironmentalAnalysis():
+    print("Environmental Analysis")
+    en_cols = ["PollutionExposure","PollenExposure","DustExposure"]
+    print(df[en_cols].describe())
+
+def MedAnalysis():
+    print ("Medical History and Symptons")
+    sympton_cols = ["Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms"]
+    for col in sympton_cols :
+        print(f"\n{col}:")
+        print(df[col].value_counts())
+
+def main():
+    Preprocessing()
+    validate()
+    demoanalyze()
+    LifestyleAnalysis()
+    EnvironmentalAnalysis()
+    MedAnalysis()
+
+main()
