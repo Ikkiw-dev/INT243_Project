@@ -4,16 +4,10 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv("asthma_disease_data_new.csv")
 
-def Overview():
-    whole_missing_rows = df[df.isna().all(axis=1)]
-    result = len(whole_missing_rows)
-    print(f"Detected whole missing rows : {result}")
-
 def fillID():
     start_id = 5034
     new_id = np.arange(start_id, start_id + len(df))
     df["PatientID"] = new_id
-    print("Process 1 : Filling PatientID completed")
 
 def fillMed():
     num_cols = ["Age", "BMI", "PhysicalActivity", "DietQuality",
@@ -21,7 +15,6 @@ def fillMed():
             "DustExposure", "LungFunctionFEV1", "LungFunctionFVC"]
     for col in num_cols:
         df[col] = df[col].fillna(df[col].median())
-    print("Process 2 : Fill median value in numerical columns completed")
 
 def fillMode():
     catego_cols = ["Gender", "Smoking", "PetAllergy",
@@ -36,12 +29,8 @@ def fillMode():
 
 def FillDoctorInCharge():
     df["DoctorInCharge"] = df["DoctorInCharge"].fillna("Dr_Confid")
-    print("Process 4 : Manage DoctorInCharge columns completed\n")
     
 def Preprocessing():
-    Overview()
-    
-    print("\nData Cleansing Process started :)\n")
     fillID()
     fillMed()
     fillMode()
@@ -50,23 +39,7 @@ def Preprocessing():
     print(df.head(10))
     df.to_csv("INT243_cleaned.csv", index=False)
 
-Preprocessing()
-
-def validate():
-    print("Data Validation Process")
-    
-    invalid_age = df[(df["Age"] < 5) | (df["Age"] > 80)]
-    print(f"Invalid Age rows : {len(invalid_age)}")
-    invalid_bmi = df[(df["BMI"] < 15) | (df["BMI"] > 40)]
-    print(f"Invalide BMI rows : {len(invalid_bmi)}")
-    duplicates = df.duplicated().sum()
-    print(f"duplicates rows detected : {duplicates}")
-    
-    print("\nFinal Missing checker")
-    print(df.isna().sum())
-
 #demographic analysis to see that age - gender affected to asthma or not
-
 def demoanalyze():
     print("\nDemoGraphic Analysis")
     print(df["Age"].describe())
@@ -102,12 +75,27 @@ def MedAnalysis():
         print(f"\n{col}:")
         print(df[col].value_counts())
 
+def DiagnosisCorrelation():
+    print("Diagnosis Correlation")
+    corr_df = df.drop(columns=["PatientID"])
+    correlation = corr_df.corr(numeric_only=True)
+    diagnosis_corr = correlation[["Diagnosis"]].sort_values(by = "Diagnosis",ascending=False)
+    print(diagnosis_corr)
+    diagnosis_corr = diagnosis_corr.drop("Diagnosis")
+    plt.figure(figsize=(6,10))
+    plt.imshow(diagnosis_corr,aspect='auto')
+    plt.colorbar()
+    plt.yticks(range(len(diagnosis_corr.index)),diagnosis_corr.index)
+    plt.xticks([0], ["Diagnosis"])
+    plt.title("Correlation with Asthma Diagnosis")
+    plt.show()
+
 def main():
     Preprocessing()
-    validate()
     demoanalyze()
     LifestyleAnalysis()
     EnvironmentalAnalysis()
     MedAnalysis()
+    DiagnosisCorrelation()
 
 main()
