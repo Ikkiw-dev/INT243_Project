@@ -2,85 +2,113 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("asthma_disease_data_new.csv")
+df_raw = pd.read_csv("asthma_disease_data_new.csv")
 
-def fillID():
+def fillID(data):
     start_id = 5034
-    new_id = np.arange(start_id, start_id + len(df))
-    df["PatientID"] = new_id
+    new_id = np.arange(start_id, start_id + len(data))
+    data["PatientID"] = new_id
+    print("Process 1 : Filling PatientID completed")
+    return data
 
-def fillMed():
-    num_cols = ["Age", "BMI", "PhysicalActivity", "DietQuality",
-            "SleepQuality", "PollutionExposure", "PollenExposure",
-            "DustExposure", "LungFunctionFEV1", "LungFunctionFVC"]
+
+def fillMed(data):
+    num_cols = ["Age","BMI","PhysicalActivity","DietQuality","SleepQuality","PollutionExposure","PollenExposure","DustExposure","LungFunctionFEV1","LungFunctionFVC"]
     for col in num_cols:
-        df[col] = df[col].fillna(df[col].median())
+        data[col] = data[col].fillna(data[col].median())
+    print("Process 2 : Fill median values completed")
+    return data
 
-def fillMode():
-    catego_cols = ["Gender", "Smoking", "PetAllergy",
-            "FamilyHistoryAsthma", "HistoryOfAllergies",
-            "Eczema", "HayFever", "GastroesophagealReflux",
-            "Wheezing", "ShortnessOfBreath", "ChestTightness",
-            "Coughing", "NighttimeSymptoms", "ExerciseInduced",
-            "Diagnosis", "EducationLevel", "Ethnicity"]
+def fillMode(data):
+    catego_cols = [
+        "Gender",
+        "Smoking",
+        "PetAllergy",
+        "FamilyHistoryAsthma",
+        "HistoryOfAllergies",
+        "Eczema",
+        "HayFever",
+        "GastroesophagealReflux",
+        "Wheezing",
+        "ShortnessOfBreath",
+        "ChestTightness",
+        "Coughing",
+        "NighttimeSymptoms",
+        "ExerciseInduced",
+        "Diagnosis",
+        "EducationLevel",
+        "Ethnicity"
+    ]
     for col in catego_cols:
-        df[col] = df[col].fillna(df[col].mode()[0])
-    print("Process 3 : Fill mode value in categorical columns completed")
+        data[col] = data[col].fillna(data[col].mode()[0])
+    print("Process 3 : Fill mode values completed")
+    return data
 
-def FillDoctorInCharge():
-    df["DoctorInCharge"] = df["DoctorInCharge"].fillna("Dr_Confid")
-    
-def Preprocessing():
-    fillID()
-    fillMed()
-    fillMode()
-    FillDoctorInCharge()
-    
-    print(df.head(10))
-    df.to_csv("INT243_cleaned.csv", index=False)
 
-#demographic analysis to see that age - gender affected to asthma or not
-def demoanalyze():
-    print("\nDemoGraphic Analysis")
-    print(df["Age"].describe())
-    
-    print("\nGender Distribution :")
-    print(df["Gender"].value_counts())
-    
+def FillDoctorInCharge(data):
+    data["DoctorInCharge"] = data["DoctorInCharge"].fillna("Dr_Confid")
+    print("Process 4 : Fill DoctorInCharge completed")
+    return data
+
+def Preprocessing(data):
+    data = fillID(data)
+    data = fillMed(data)
+    data = fillMode(data)
+    data = FillDoctorInCharge(data)
+
+    return data
+
+def CompareMissing(raw_data, processed_data):
+    raw_missing = raw_data.isna().sum()
+    processed_missing = processed_data.isna().sum()
+    compare = pd.DataFrame({
+        "Raw Data": raw_missing,
+        "Processed Data": processed_missing
+    })
+    print(compare)
+
+
+def CompareCompleteness(raw_data, processed_data):
+    raw_incomplete = len(raw_data[raw_data.isna().any(axis=1)])
+    processed_incomplete = len(processed_data[processed_data.isna().any(axis=1)])
+    print(f"\nRaw incomplete records: {raw_incomplete}")
+    print(f"Processed incomplete records: {processed_incomplete}")
+
+def DemographicAnalysis(data):
+    print("\nAge Statistics:")
+    print(data["Age"].describe())
+
+    print("\nGender Distribution:")
+    print(data["Gender"].value_counts())
+
     plt.figure(figsize=(8,5))
-    plt.hist(df["Age"], bins=10)
+    plt.hist(data["Age"], bins=10)
     plt.xlabel("Age")
     plt.ylabel("Frequency")
     plt.title("Age Distribution")
     plt.show()
 
-def LifestyleAnalysis():
-    print("\nLifestyle Analysis")
-    print(df[["BMI", "PhysicalActivity", "Smoking"]].describe())
+def LifestyleAnalysis(data):
+    print(data[["BMI","PhysicalActivity","Smoking"]].describe())
     plt.figure(figsize=(6,4))
-    df.boxplot(column="BMI", by="Diagnosis")
+    data.boxplot(column="BMI",by="Diagnosis")
     plt.title("BMI vs Asthma Diagnosis")
     plt.suptitle("")
     plt.show()
 
-def EnvironmentalAnalysis():
-    print("Environmental Analysis")
-    en_cols = ["PollutionExposure","PollenExposure","DustExposure"]
-    print(df[en_cols].describe())
+def EnvironmentalAnalysis(data):
+    env_cols = ["PollutionExposure","PollenExposure","DustExposure"]
+    print(data[env_cols].describe())
 
-def MedAnalysis():
-    print ("Medical History and Symptons")
-    sympton_cols = ["Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms"]
-    for col in sympton_cols :
+def MedicalAnalysis(data):
+    symptom_cols = ["Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms"]
+    for col in symptom_cols:
         print(f"\n{col}:")
-        print(df[col].value_counts())
+        print(data[col].value_counts())
 
-def DiagnosisCorrelation():
-    print("Diagnosis Correlation")
-    corr_df = df.drop(columns=["PatientID"])
-    correlation = corr_df.corr(numeric_only=True)
-    diagnosis_corr = correlation[["Diagnosis"]].sort_values(by = "Diagnosis",ascending=False)
-    print(diagnosis_corr)
+def DiagnosisCorrelation(data): 
+    diagnosis_corr = df_raw.drop(columns=["PatientID"]).corr(numeric_only=True)[["Diagnosis"]].sort_values(by="Diagnosis", ascending=False)
+
     diagnosis_corr = diagnosis_corr.drop("Diagnosis")
     plt.figure(figsize=(6,10))
     plt.imshow(diagnosis_corr,aspect='auto')
@@ -91,11 +119,15 @@ def DiagnosisCorrelation():
     plt.show()
 
 def main():
-    Preprocessing()
-    demoanalyze()
-    LifestyleAnalysis()
-    EnvironmentalAnalysis()
-    MedAnalysis()
-    DiagnosisCorrelation()
-
+    raw_data = df_raw.copy()
+    processed_data = Preprocessing(raw_data.copy())
+    processed_data.to_csv("INT243_cleaned.csv",index=False)
+    CompareMissing(raw_data,processed_data)
+    CompareCompleteness(raw_data,processed_data)
+    DemographicAnalysis(processed_data)
+    LifestyleAnalysis(processed_data)
+    EnvironmentalAnalysis(processed_data)
+    MedicalAnalysis(processed_data)
+    DiagnosisCorrelation(processed_data)
+    
 main()
