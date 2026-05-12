@@ -66,13 +66,11 @@ def CompareMissing(raw_data, processed_data):
         "Processed Data": processed_missing
     })
     print(compare)
-
-
-def CompareCompleteness(raw_data, processed_data):
     raw_incomplete = len(raw_data[raw_data.isna().any(axis=1)])
     processed_incomplete = len(processed_data[processed_data.isna().any(axis=1)])
     print(f"\nRaw incomplete records: {raw_incomplete}")
     print(f"Processed incomplete records: {processed_incomplete}")
+
 
 def DemographicAnalysis(data):
     print("\nAge Statistics:")
@@ -88,23 +86,41 @@ def DemographicAnalysis(data):
     plt.title("Age Distribution")
     plt.show()
 
-def LifestyleAnalysis(data):
-    print(data[["BMI","PhysicalActivity","Smoking"]].describe())
-    plt.figure(figsize=(6,4))
-    data.boxplot(column="BMI",by="Diagnosis")
-    plt.title("BMI vs Asthma Diagnosis")
-    plt.suptitle("")
-    plt.show()
+def FeatureAnalysis(data):
+    print("\n=== Feature Analysis ===")
+    feature_cols = [
+        "BMI",
+        "PhysicalActivity",
+        "PollutionExposure",
+        "PollenExposure",
+        "DustExposure",
+    ]
+    print(data[feature_cols].describe())
+    for col in feature_cols:
+        plt.figure(figsize=(6,4))
+        y_jitter = data["Diagnosis"] + np.random.normal(0,0.03,len(data))
+        colors = data["Diagnosis"].map({0: "blue",1: "red"})
+        plt.scatter(data[col],y_jitter,c=colors,s=10,alpha=0.5)
+        plt.xlabel(col)
+        plt.ylabel("Diagnosis")
+        plt.title(f"{col} vs Asthma Diagnosis")
+        plt.show()
+        
+    binary_cols = ["Smoking","Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms"]
+    print("\nBinary Features")
+    for col in binary_cols:
+        result = data.groupby([col, "Diagnosis"]).size().unstack(fill_value=0)
 
-def EnvironmentalAnalysis(data):
-    env_cols = ["PollutionExposure","PollenExposure","DustExposure"]
-    print(data[env_cols].describe())
+        print(f"\n{col}")
+        print(result)
 
-def MedicalAnalysis(data):
-    symptom_cols = ["Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms"]
-    for col in symptom_cols:
-        print(f"\n{col}:")
-        print(data[col].value_counts())
+        result.plot(kind='bar',figsize=(7,5))
+        plt.xlabel(col)
+        plt.ylabel("Count")
+        plt.title(f"{col} vs no {col} that affected Asthma Diagnosis")
+        plt.xticks([0,1],["No", "Yes"],rotation=0)
+        plt.legend(["No Asthma","Asthma"])
+        plt.show()
 
 def DiagnosisCorrelation(data): 
     diagnosis_corr = df_raw.drop(columns=["PatientID"]).corr(numeric_only=True)[["Diagnosis"]].sort_values(by="Diagnosis", ascending=False)
@@ -123,11 +139,8 @@ def main():
     processed_data = Preprocessing(raw_data.copy())
     processed_data.to_csv("INT243_cleaned.csv",index=False)
     CompareMissing(raw_data,processed_data)
-    CompareCompleteness(raw_data,processed_data)
     DemographicAnalysis(processed_data)
-    LifestyleAnalysis(processed_data)
-    EnvironmentalAnalysis(processed_data)
-    MedicalAnalysis(processed_data)
+    FeatureAnalysis(processed_data)
     DiagnosisCorrelation(processed_data)
     
 main()
