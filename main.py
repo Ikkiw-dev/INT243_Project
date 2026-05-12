@@ -87,7 +87,7 @@ def DemographicAnalysis(data):
     plt.show()
 
 def FeatureAnalysis(data):
-    print("\n=== Feature Analysis ===")
+    print("\nFeature Analysis")
     feature_cols = [
         "BMI",
         "PhysicalActivity",
