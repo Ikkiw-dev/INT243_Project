@@ -85,6 +85,16 @@ def DemographicAnalysis(data):
     plt.ylabel("Frequency")
     plt.title("Age Distribution")
     plt.show()
+    gender_result = data.groupby(["Gender", "Diagnosis"]).size().unstack(fill_value=0)
+    ax = gender_result.plot(kind='bar',figsize=(7,5))
+    plt.xlabel("Gender")
+    plt.ylabel("Count")
+    plt.title("Gender vs Asthma Diagnosis")
+    plt.xticks([0,1],["Male", "Female"],rotation=0)
+    plt.legend(["No Asthma","Asthma"])
+    for container in ax.containers:
+        ax.bar_label(container,fmt='%d',padding=3)
+    plt.show()
 
 def FeatureAnalysis(data):
     print("\nFeature Analysis")
@@ -93,7 +103,7 @@ def FeatureAnalysis(data):
         "PhysicalActivity",
         "PollutionExposure",
         "PollenExposure",
-        "DustExposure",
+        "DustExposure"
     ]
     print(data[feature_cols].describe())
     for col in feature_cols:
@@ -105,8 +115,9 @@ def FeatureAnalysis(data):
         plt.ylabel("Diagnosis")
         plt.title(f"{col} vs Asthma Diagnosis")
         plt.show()
-        
-    binary_cols = ["Smoking","Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms"]
+
+def Symptonsfactor(data):
+    binary_cols = ["Wheezing","ShortnessOfBreath","Coughing","NighttimeSymptoms","ChestTightness","ExerciseInduced"]
     print("\nBinary Features")
     for col in binary_cols:
         result = data.groupby([col, "Diagnosis"]).size().unstack(fill_value=0)
@@ -114,14 +125,17 @@ def FeatureAnalysis(data):
         print(f"\n{col}")
         print(result)
 
-        result.plot(kind='bar',figsize=(7,5))
+        ax = result.plot(kind='bar',figsize=(7,5))
         plt.xlabel(col)
         plt.ylabel("Count")
         plt.title(f"{col} vs no {col} that affected Asthma Diagnosis")
         plt.xticks([0,1],["No", "Yes"],rotation=0)
         plt.legend(["No Asthma","Asthma"])
+        for container in ax.containers:
+            ax.bar_label(container, fmt='%d', padding=3)
         plt.show()
 
+#Answer The main questions
 def DiagnosisCorrelation(data): 
     diagnosis_corr = df_raw.drop(columns=["PatientID"]).corr(numeric_only=True)[["Diagnosis"]].sort_values(by="Diagnosis", ascending=False)
 
@@ -141,6 +155,7 @@ def main():
     CompareMissing(raw_data,processed_data)
     DemographicAnalysis(processed_data)
     FeatureAnalysis(processed_data)
+    Symptonsfactor(processed_data)
     DiagnosisCorrelation(processed_data)
     
 main()
